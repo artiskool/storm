@@ -1,0 +1,26 @@
+{
+    "name": "artiskool/storm",
+    "description": "Simple Transactional Object Relational Mapper",
+    "type": "library",
+    "license": "GPL v3",
+    "keywords": [
+        "artiskool",
+        "storm"
+    ],
+    "homepage": "http://storm.com.ph/",
+    "support": {
+        "email": "support@storm.com.ph",
+        "source": "https://github.com/artiskool/storm",
+        "issues": "https://github.com/artiskool/storm/issues"
+    },
+    "require": {
+        "php": ">=5.3.23"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Storm\\": "src/"
+        }
+    }
+}
