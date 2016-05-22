@@ -39,7 +39,7 @@ class Main
         */
 
         //$user->user_id = 3;
-        $user->id = 1442;
+        //$user->id = 1442;
         $user->populate();
         $user->username = 'test';
         $user->password = 'test';
