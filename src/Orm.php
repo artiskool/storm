@@ -173,7 +173,7 @@ abstract class Orm implements OrmInterface, \Iterator
                     }
                 }
                 if (in_array($newKey, $fields)) {
-                    $this->$key = $this->$newKey;
+                    $obj->$key = $this->$newKey;
                 }
             }
             $obj->populate();
