@@ -16,7 +16,7 @@ namespace Storm\Model;
 
 class Person extends Model
 {
-    protected $person_id;
+    protected $id;
     protected $last_name;
     protected $first_name;
     protected $middle_name;
@@ -27,6 +27,7 @@ class Person extends Model
     protected $photo;
     protected $status;
 
-    protected $_primaryKeys = array('person_id');
+    protected $_primaryKeys = array('id');
     protected $_table = 'hive_persons';
+    protected $_foreignKey = 'person_id';
 }

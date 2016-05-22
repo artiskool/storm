@@ -56,6 +56,7 @@ abstract class Orm implements OrmInterface, \Iterator
     public static $_nsdrNamespace = false;
     protected $_audit;
     protected $_auditValue;
+    protected $_foreignKey;
 
     public function __construct()
     {
@@ -163,21 +164,16 @@ abstract class Orm implements OrmInterface, \Iterator
                 continue;
             }
             foreach ($obj->_primaryKeys as $key) {
-                if (in_array($key, $this->fields())) {
-                    $obj->$key = $this->$key;
-                } else {
-                    // check if there's an underscore
-                    if (strpos($key, '_') !== false) { // table_id
-                        $ucwords = ucwords(str_replace('_', ' ', $key));
-                        $newKey = str_replace(' ', '', $ucwords);
-                        // lower case the first character
-                        $newKey[0] = strtolower($newKey[0]);
+                $newKey = $key;
+                if ($key == 'id') { // get the foreign key
+                    if ($obj->_foreignKey) {
+                        $newKey = $obj->_foreignKey;
                     } else {
-                        $newKey = preg_replace('/([A-Z]{1})/', '_\1', $key);
+                        $newKey = strtolower(self::className($obj)) . '_id';
                     }
-                    if (in_array($newKey, $this->fields())) {
-                        // $obj->$newKey = $this->$newKey;
-                    }
+                }
+                if (in_array($newKey, $fields)) {
+                    $this->$key = $this->$newKey;
                 }
             }
             $obj->populate();

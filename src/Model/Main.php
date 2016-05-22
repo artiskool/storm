@@ -39,11 +39,17 @@ class Main
         */
 
         //$user->user_id = 3;
+        $user->id = 1442;
+        $user->populate();
         $user->username = 'test';
         $user->password = 'test';
+/*
         //$user->populate();
         $user->person->email = 'me@art.net.ph';
+        $user->person->lastName = 'Layese';
+        $user->person->firstName = 'Art';
         $user->persist();
+*/
 
         echo $user;
         //print_r($user->toArray());

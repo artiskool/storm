@@ -16,7 +16,7 @@ namespace Storm\Model;
 
 class User extends Model
 {
-    protected $user_id;
+    protected $id;
     protected $person_id;
     protected $person;
     protected $username;
@@ -24,8 +24,9 @@ class User extends Model
     protected $salt;
     protected $status;
 
-    protected $_primaryKeys = array('user_id');
+    protected $_primaryKeys = array('id');
     protected $_table = 'hive_users';
+    protected $_foreignKey = 'user_id';
 
     public function init()
     {
