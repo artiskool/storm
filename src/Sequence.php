@@ -17,6 +17,7 @@ namespace Storm;
 abstract class Sequence
 {
     protected $_table = 'sequences';
+    protected $_primaryKey = 'id';
     protected $_dbAdapter;
 
     public function __construct($dbAdapter = null)
@@ -35,10 +36,10 @@ abstract class Sequence
         $this->_dbAdapter->beginTransaction();
         try {
             $sql = "UPDATE {$tableName} SET sequence = sequence + 1"
-                 . " WHERE sequence_id = {$key}";
+                 . " WHERE {$this->_primaryKey} = {$key}";
             $this->_dbAdapter->update($sql);
             $sql = "SELECT sequence FROM {$tableName}"
-                 . " WHERE sequence_id = {$key}";
+                 . " WHERE {$this->_primaryKey} = {$key}";
             if ($row = $this->_dbAdapter->fetchOne($sql)) {
                 $id = $row->sequence;
             }
