@@ -20,7 +20,7 @@ trait CommonTrait
     {
         static $dbAdapter = null;
         if ($dbAdapter === null) {
-            $dbAdapter = new DbLaravel();
+            $dbAdapter = new Db();
         }
         return $dbAdapter;
     }
