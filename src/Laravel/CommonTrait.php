@@ -14,6 +14,8 @@
 
 namespace Storm\Laravel;
 
+use Storm\AuditLog;
+
 trait CommonTrait
 {
     public function dbAdapter()
@@ -27,6 +29,16 @@ trait CommonTrait
 
     public function init()
     {
+        if (!defined('STORM_REGISTER_SHUTDOWN')) {
+            $dbConfig = $this->dbAdapter()->getConfig();
+            // this MUST be required as this is used as DB connection
+            AuditLog::setDbConfig($dbConfig);
+            register_shutdown_function(array(
+                'Storm\AuditLog',
+                'closeConnection'
+            ));
+            define('STORM_REGISTER_SHUTDOWN', true);
+        }
     }
 
     public function ormSequence()

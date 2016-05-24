@@ -225,13 +225,7 @@ abstract class Orm implements OrmInterface, \Iterator
         $class = $this->ormAudit();
         $audit = new $class();
         $audit->objectClass = self::className($obj);
-        $classObjectIdKey = lcfirst($audit->objectClass);
-        $objectIdKey = $classObjectIdKey . 'Id';
-        $legacyIdKey = preg_replace('/([A-Z]{1})/', '_\1', $classObjectIdKey);
-        $objectLegacyIdKey = strtolower($legacyIdKey) . '_id';
-        if (!isset($obj->$objectIdKey) && !isset($obj->$objectLegacyIdKey)) {
-            return false;
-        }
+        $objectIdKey = $obj->_primaryKeys[0];
         $audit->auditId = $this->ormSequence()->nextId(2);
         $audit->objectId = $obj->$objectIdKey;
         $audit->userId = Registry::get('user_id');

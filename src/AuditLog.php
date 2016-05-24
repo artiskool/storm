@@ -94,11 +94,12 @@ class AuditLog
      */
     public static function closeConnection()
     {
-        header("Connection: close");
-        $size = ob_get_length();
-        header("Content-Length: $size");
-        ob_end_flush();
-        flush();
+        //ob_start();
+        //header("Connection: close");
+        //$size = ob_get_length();
+        //header("Content-Length: $size");
+        //ob_end_flush();
+        //flush();
         self::persist();
     }
 
@@ -151,12 +152,12 @@ class AuditLog
 
         // generate queries
         $queries = implode(";\n", self::$_sql);
-        file_put_contents('/tmp/audit', print_r($queries, true));
+        file_put_contents('/tmp/audit.sql', print_r($queries, true), FILE_APPEND);
 
         /* execute multi query */
         $ret = $mysqli->multi_query($queries);
         if ($ret === false) {
-            $error = 'Audit SQL failed: '.$queries;
+            $error = 'Audit SQL failed['.$mysqli->error.']: '.$queries;
             trigger_error($error, E_USER_WARNING);
         }
 
