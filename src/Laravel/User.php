@@ -4,7 +4,7 @@
  *  User.php                                                                 *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
- *  @package    Storm                                                        *
+ *  @package    Storm\Laravel                                                *
  *  @copyright  (c) 2016 Arthur Layese (http://storm.com.ph)                 *
  *  @license    This file is licensed under the GPL V3, you can find a copy  *
  *              of that license by visiting:                                 *
@@ -12,7 +12,7 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\Model;
+namespace Storm\Laravel;
 
 class User extends Model
 {
@@ -31,32 +31,6 @@ class User extends Model
     public function init()
     {
         $this->person = new Person();
-    }
-
-    public function populateWithUsername($username = null)
-    {
-        if ($username === null) {
-            $username = $this->username;
-        }
-        $db = Zend_Registry::get('dbAdapter');
-        $sql = "SELECT * from " . $this->_table . " WHERE 1 "
-             . " and username = " . $db->quote($username);
-        $this->populateWithSql($sql);
-        $this->person->person_id = $this->person_id;
-        $this->person->populate();
-    }
-
-    public function populateWithPersonId($personId = null)
-    {
-        if ($personId === null) {
-            $personId = $this->person_id;
-        }
-        $db = Zend_Registry::get('dbAdapter');
-        $sql = "SELECT * from " . $this->_table . " WHERE 1 "
-             . " and person_id = " . $db->quote($personId);
-        $this->populateWithSql($sql);
-        $this->person->person_id = $this->person_id;
-        $this->person->populate();
     }
 
     public function __get($key)
