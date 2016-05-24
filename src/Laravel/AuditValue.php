@@ -19,6 +19,4 @@ use Storm\AuditValue as StormAuditValue;
 class AuditValue extends StormAuditValue
 {
     use CommonTrait;
-
-    protected $_table = 'hive_audit_values';
 }

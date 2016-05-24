@@ -19,6 +19,4 @@ use Storm\Audit as StormAudit;
 class Audit extends StormAudit
 {
     use CommonTrait;
-
-    protected $_table = 'hive_audits';
 }

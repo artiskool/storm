@@ -18,5 +18,4 @@ use Storm\Sequence as StormSequence;
 
 class Sequence extends StormSequence
 {
-	protected $_table = 'hive_sequences';
 }
