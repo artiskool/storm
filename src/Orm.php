@@ -51,8 +51,9 @@ abstract class Orm implements OrmInterface, \Iterator
     protected $_primaryKeys = array();
     protected $_table;
     protected $_cascadePersist = true;
-    protected $_shouldAudit = true;
     protected $_cascadePopulate = true;
+    protected $_cascadeToArray = true;
+    protected $_shouldAudit = true;
     public static $_nsdrNamespace = false;
     protected $_audit;
     protected $_auditValue;
@@ -267,7 +268,7 @@ abstract class Orm implements OrmInterface, \Iterator
 
     public function toString()
     {
-        return print_r($this->toArray(), true);
+        return json_encode($this->toArray());
     }
 
     public function toArray()
@@ -276,7 +277,9 @@ abstract class Orm implements OrmInterface, \Iterator
         $array = array();
         foreach ($fields as $value) {
             if ($this->$value instanceof OrmInterface) {
-                $array[$value] = $this->$value->toArray();
+                if ($this->_cascadeToArray) {
+                    $array[$value] = $this->$value->toArray();
+                }
             } else {
                 $array[$value] = $this->$value;
             }
@@ -380,7 +383,7 @@ abstract class Orm implements OrmInterface, \Iterator
 
     public function __toString()
     {
-        return json_encode($this->toArray());
+        return $this->toString();
     }
 
     public function clearPrimaryKeys()
