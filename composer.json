@@ -5,7 +5,8 @@
     "license": "GPL v3",
     "keywords": [
         "artiskool",
-        "storm"
+        "storm",
+        "orm"
     ],
     "homepage": "http://storm.com.ph/",
     "support": {
@@ -14,9 +15,10 @@
         "issues": "https://github.com/artiskool/storm/issues"
     },
     "require": {
-        "php": ">=5.3.23"
+        "php": ">=5.4.0"
     },
     "require-dev": {
+        "php": ">=5.4.0"
     },
     "autoload": {
         "psr-4": {
