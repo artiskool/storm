@@ -386,6 +386,37 @@ abstract class Orm implements OrmInterface, \Iterator
         return $this->toString();
     }
 
+    protected function getSet($key, Array $value)
+    {
+        if (array_key_exists(0, $value)) {
+            $this->$key = $value[0];
+            return $this;
+        }
+        return $this->$key;
+    }
+
+    public function __call($method, $args)
+    {
+        $fields = $this->fields();
+
+        if (in_array($method, $fields)) {
+            return $this->getSet($method, $args);
+        }
+        $method2 = strtolower($method);
+        if ($method != $method2 && in_array($method2, $fields)) {
+            return $this->getSet($method2, $args);
+        }
+        $method2 = preg_replace('/([A-Z]{1})/','_\1', $method);
+        if ($method != $method2 && in_array($method2, $fields)) {
+            return $this->getSet($method2, $args);
+        }
+        $method2 = strtolower($method2);
+        if ($method != $method2 && in_array($method2, $fields)) {
+            return $this->getSet($method2, $args);
+        }
+        throw new \Exception('Call to undefined method '.get_class($this).'::'.$method.'()');
+    }
+
     public function clearPrimaryKeys()
     {
         $this->_primaryKeys = array();
