@@ -1,7 +1,7 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  Sequence.php                                                             *
+ *  Model.php                                                                *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
  *  @package    Storm\Laravel                                                *
@@ -12,10 +12,11 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\Laravel;
+namespace Storm\Adapter\Laravel;
 
-use Storm\Sequence as StormSequence;
+use Storm\Entity;
 
-class Sequence extends StormSequence
+abstract class Model extends Entity
 {
+    use CommonTrait;
 }

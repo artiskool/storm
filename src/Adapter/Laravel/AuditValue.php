@@ -1,7 +1,7 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  Db.php                                                                   *
+ *  AuditValue.php                                                           *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
  *  @package    Storm\Laravel                                                *
@@ -12,21 +12,11 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\Laravel;
+namespace Storm\Adapter\Laravel;
 
-use Storm\DbAdapter\Laravel as DbAdapterLaravel;
+use Storm\AuditValue as StormAuditValue;
 
-class Db extends DbAdapterLaravel
+class AuditValue extends StormAuditValue
 {
-    public function getConfig()
-    {
-        $driver = \Config::get('database.default');
-        $config = \Config::get('database.connections.'.$driver);
-        return array(
-            'hostname' => $config['host'],
-            'username' => $config['username'],
-            'password' => $config['password'],
-            'database' => $config['database'],
-        );
-    }
+    use CommonTrait;
 }

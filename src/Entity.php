@@ -56,6 +56,63 @@ abstract class Entity implements Orm, \Iterator
 
     private $_tracking;
 
+    public function __construct()
+    {
+        $primaryKeys = $this->getPrimaryKeys();
+        if (count($primaryKeys) == 0) {
+            $key = strtolower(self::toClassName($this)) . '_id';
+            $primaryKeys[] = $key;
+            $this->setPrimaryKeys($primaryKeys);
+        }
+        if (empty($this->getTable())) {
+            $this->setTable(strtolower(self::toClassName($this)));
+        }
+    }
+
+    public function __set($key, $value)
+    {
+        $newKey = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+        $method = "set{$newKey}";
+        if (method_exists($this, $method)) {
+            $this->$method($value);
+            return $this;
+        }
+        $newKey = strtolower(preg_replace('/([A-Z]{1})/','_\1', $key));
+        if (strpos($newKey, '_') !== false
+            && in_array($newKey, $this->fields())
+        ) {
+            $this->$newKey = $value;
+            return $this;
+        }
+        $this->$key = $value;
+        return $this;
+    }
+
+    public function __get($key)
+    {
+        $newKey = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+        $method = "get{$newKey}";
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
+        $newKey = strtolower(preg_replace('/([A-Z]{1})/','_\1', $key));
+        if (strpos($newKey, '_') !== false
+            && in_array($newKey, $this->fields())
+        ) {
+            return $this->$newKey;
+        }
+        $ret = null;
+        if (isset($this->$key)) {
+            $ret = $this->$key;
+        }
+        return $ret;
+    }
+
+    public function __isset($key)
+    {
+        return $this->__get($key);
+    }
+
     public function getPersistMode()
     {
         return $this->_persistMode;
@@ -142,19 +199,6 @@ abstract class Entity implements Orm, \Iterator
     {
         $this->_foreignKey = $foreignKey;
         return $this;
-    }
-
-    public function __construct()
-    {
-        $primaryKeys = $this->getPrimaryKeys();
-        if (count($primaryKeys) == 0) {
-            $key = strtolower(self::toClassName($this)) . '_id';
-            $primaryKeys[] = $key;
-            $this->setPrimaryKeys($primaryKeys);
-        }
-        if (empty($this->getTable())) {
-            $this->setTable(strtolower(self::toClassName($this)));
-        }
     }
 
     public static function toClassName($obj)
@@ -458,11 +502,11 @@ abstract class Entity implements Orm, \Iterator
     {
         $class = get_class($this) . 'Collection';
         if (class_exists($class)) {
-            $iterator = new $class();
+            $collection = new $class();
         } else {
-            $iterator = new Collection(get_class($this), $dbSelect);
+            $collection = new Collection(get_class($this), $dbSelect);
         }
-        return $iterator;
+        return $collection;
     }
 
     public function postPersist()

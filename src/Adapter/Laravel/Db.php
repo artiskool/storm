@@ -1,10 +1,10 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  DbLaravel.php                                                            *
+ *  Db.php                                                                   *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
- *  @package    Storm\Adapter                                                *
+ *  @package    Storm\Laravel                                                *
  *  @copyright  (c) 2016 Arthur Layese (http://storm.com.ph)                 *
  *  @license    This file is licensed under the GPL V3, you can find a copy  *
  *              of that license by visiting:                                 *
@@ -12,13 +12,23 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\DbAdapter;
+namespace Storm\Adapter\Laravel;
 
-use Storm\DbInterface;
+use Storm\Db as StormDb;
 
-abstract class Laravel implements DbInterface
+class Db implements StormDb
 {
-    abstract public function getConfig();
+    public function getConfig()
+    {
+        $driver = \Config::get('database.default');
+        $config = \Config::get('database.connections.'.$driver);
+        return array(
+            'hostname' => $config['host'],
+            'username' => $config['username'],
+            'password' => $config['password'],
+            'database' => $config['database'],
+        );
+    }
 
     public function beginTransaction()
     {

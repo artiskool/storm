@@ -22,11 +22,7 @@ interface Orm
     public function ormAudit();
     public function ormAuditValue();
 
-    public function persist();
     public function setPersistMode($mode);
-    public function populate();
-    public function fields();
-    public function postPersist();
     public function populateWithArray($array);
     public function populate();
     public function postPopulate();
