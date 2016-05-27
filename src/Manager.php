@@ -1,7 +1,7 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  OrmTransactionManager.php                                                *
+ *  Manager.php                                                              *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
  *  @package    Storm                                                        *
@@ -33,7 +33,7 @@
 
 namespace Storm;
 
-class OrmTransactionManager
+class Manager
 {
     protected $auditLogQueries = array();
     protected $queries = array();
