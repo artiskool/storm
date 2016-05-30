@@ -1,10 +1,10 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  OrmInterface.php                                                         *
+ *  Model.php                                                                *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
- *  @package    Storm                                                        *
+ *  @package    Storm\Laravel                                                *
  *  @copyright  (c) 2016 Arthur Layese (http://storm.com.ph)                 *
  *  @license    This file is licensed under the GPL V3, you can find a copy  *
  *              of that license by visiting:                                 *
@@ -12,13 +12,11 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm;
+namespace Storm\Adapter\Laravel;
 
-interface OrmInterface
+use Storm\Entity;
+
+abstract class Model extends Entity
 {
-    public function persist();
-    public function setPersistMode($mode);
-    public function populate();
-    public function fields();
-    public function postPersist();
+    use CommonTrait;
 }

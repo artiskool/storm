@@ -1,7 +1,7 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  AuditValue.php                                                           *
+ *  Sequence.php                                                             *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
  *  @package    Storm\Laravel                                                *
@@ -12,11 +12,10 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\Laravel;
+namespace Storm\Adapter\Laravel;
 
-use Storm\AuditValue as StormAuditValue;
+use Storm\Sequence as StormSequence;
 
-class AuditValue extends StormAuditValue
+class Sequence extends StormSequence
 {
-    use CommonTrait;
 }

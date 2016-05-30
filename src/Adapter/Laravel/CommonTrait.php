@@ -12,7 +12,7 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\Laravel;
+namespace Storm\Adapter\Laravel;
 
 use Storm\AuditLog;
 
@@ -27,7 +27,7 @@ trait CommonTrait
         return $dbAdapter;
     }
 
-    public function init()
+    public function __construct()
     {
         if (!defined('STORM_REGISTER_SHUTDOWN')) {
             $dbConfig = $this->dbAdapter()->getConfig();
@@ -39,6 +39,7 @@ trait CommonTrait
             ));
             define('STORM_REGISTER_SHUTDOWN', true);
         }
+        parent::__construct();
     }
 
     public function ormSequence()

@@ -12,7 +12,7 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\Laravel;
+namespace Storm\Adapter\Laravel;
 
 use Storm\Audit as StormAudit;
 

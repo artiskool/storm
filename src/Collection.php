@@ -1,7 +1,7 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  OrmIterator.php                                                          *
+ *  Collection.php                                                           *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
  *  @package    Storm                                                        *
@@ -33,86 +33,86 @@
 
 namespace Storm;
 
-class OrmIterator implements \SeekableIterator
+class Collection implements \SeekableIterator
 {
-    protected $_class;
-    protected $_orm;
-    protected $_select;
-    protected $_offset = 0;
-    protected $_row;
-    protected $_rows;
-    protected $_loadOnce = true;
-    protected $_init = false;
+    protected $class;
+    protected $orm;
+    protected $select;
+    protected $offset = 0;
+    protected $row;
+    protected $rows;
+    protected $loadOnce = true;
+    protected $init = false;
 
     public function __construct($class, $select = null)
     {
         if (is_object($class)) {
-            $this->_class = get_class($class);
-            $this->_orm = $class;
+            $this->class = get_class($class);
+            $this->orm = $class;
         } else {
-            $this->_class = $class;
-            $this->_orm = new $this->_class();
+            $this->class = $class;
+            $this->orm = new $this->class();
         }
         if (null === $select) {
-            $select = "SELECT * FROM {$this->_orm->_table}";
+            $select = "SELECT * FROM `{$this->orm->_table}`";
         }
-        $this->_select = $select;
+        $this->select = $select;
     }
 
     public function init()
     {
-        if ($this->_loadOnce) {
-            $this->_rows = $this->_orm->dbAdapter()->fetchAll($this->_select);
+        if ($this->loadOnce) {
+            $this->rows = $this->orm->dbAdapter()->fetchAll($this->select);
         }
-        $this->_init = true;
+        $this->init = true;
     }
 
     public function setFilters(array $filters)
     {
         $where = array();
-        $fields = $this->_orm->fields();
+        $fields = $this->orm->fields();
         foreach ($filters as $key => $value) {
             if (in_array($key, $fields)) {
                 if (is_array($value)) {
                     $fieldValues = array();
                     foreach ($value as $val) {
-                        $val = $this->_orm->dbAdapter()->quote($val);
+                        $val = $this->orm->dbAdapter()->quote($val);
                         $fieldValues[] = $val;
                     }
                     $where[] = "`{$key}` IN ("
                              . implode(', ', $fieldValues) . ')';
                 } else {
                     $where[] = "`{$key}` = "
-                             . $this->_orm->dbAdapter()->quote($value);
+                             . $this->orm->dbAdapter()->quote($value);
                 }
             }
         }
         if ($where) {
-            $this->_select .= " WHERE " . implode(' AND ', $where);
+            $this->select .= " WHERE " . implode(' AND ', $where);
         }
     }
 
     public function getLoadOnce()
     {
-        return $this->_loadOnce;
+        return $this->loadOnce;
     }
 
     public function setLoadOnce($loadOnce)
     {
-        $this->_loadOnce = (bool)$loadOnce;
+        $this->loadOnce = (bool)$loadOnce;
     }
 
     public function rewind()
     {
-        $this->_offset = 0;
+        $this->offset = 0;
         return $this;
     }
 
     public function first()
     {
-        $obj = new $this->_class();
+        $obj = new $this->class();
         if ($this->valid()) {
-            $sql = "{$this->_select} LIMIT 0, 1";
+            $sql = "{$this->select} LIMIT 0, 1";
             $row = $obj->dbAdapter()->fetchOne($sql);
             $obj->populateWithArray($row);
         }
@@ -121,13 +121,13 @@ class OrmIterator implements \SeekableIterator
 
     public function valid()
     {
-        if (!$this->_init) {
+        if (!$this->init) {
             $this->init();
         }
-        $obj = new $this->_class();
-        $sql = "{$this->_select} LIMIT {$this->_offset}, 1";
-        $this->_row = $obj->dbAdapter()->fetchOne($sql);
-        if ($this->_row) {
+        $obj = new $this->class();
+        $sql = "{$this->select} LIMIT {$this->offset}, 1";
+        $this->row = $obj->dbAdapter()->fetchOne($sql);
+        if ($this->row) {
             return true;
         }
         return false;
@@ -135,25 +135,25 @@ class OrmIterator implements \SeekableIterator
 
     public function key()
     {
-        return $this->_offset;
+        return $this->offset;
     }
 
     public function current()
     {
-        $obj = new $this->_class();
-        $obj->populateWithArray($this->_row);
+        $obj = new $this->class();
+        $obj->populateWithArray($this->row);
         return $obj;
     }
 
     public function seek($offset)
     {
-        $this->_offset = $offset;
+        $this->offset = $offset;
         return $this->current();
     }
 
     public function next()
     {
-        $this->_offset++;
+        $this->offset++;
     }
 
     public function toArray($key = null, $value)

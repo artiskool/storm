@@ -1,7 +1,7 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  Model.php                                                                *
+ *  ModelCollection.php                                                      *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
  *  @package    Storm\Laravel                                                *
@@ -12,11 +12,10 @@
  *                                                                           *
 \*****************************************************************************/
 
-namespace Storm\Laravel;
+namespace Storm\Adapter\Laravel;
 
-use Storm\Orm;
+use Storm\Collection;
 
-abstract class Model extends Orm
+abstract class ModelCollection extends Collection
 {
-    use CommonTrait;
 }
