@@ -30,6 +30,7 @@ abstract class Orm
     protected $_shouldAudit = true;
     protected $_foreignKey;
 
+    abstract public function init();
     abstract public function dbAdapter();
 
     abstract public function ormSequence();
