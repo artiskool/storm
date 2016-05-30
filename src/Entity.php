@@ -39,6 +39,7 @@ abstract class Entity extends Orm implements \Iterator
 
     public function __construct()
     {
+        $this->init();
         if (count($this->_primaryKeys) == 0) {
             $key = strtolower(self::toClassName($this)) . '_id';
             $this->_primaryKeys[] = $key;
