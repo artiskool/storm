@@ -54,7 +54,7 @@ class Collection implements \SeekableIterator
             $this->orm = new $this->class();
         }
         if (null === $select) {
-            $select = "SELECT * FROM " . $this->orm->getTable();
+            $select = "SELECT * FROM `{$this->orm->_table}`";
         }
         $this->select = $select;
     }

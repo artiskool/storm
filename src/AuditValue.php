@@ -33,7 +33,7 @@
 
 namespace Storm;
 
-abstract class AuditValue extends Orm
+abstract class AuditValue extends Entity
 {
     protected $audit_value_id;
     protected $audit_id;

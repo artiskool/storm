@@ -22,7 +22,7 @@ abstract class Sequence
 
     public function __construct($dbAdapter = null)
     {
-        if ($dbAdapter && $dbAdapter instanceof DbInterface) {
+        if ($dbAdapter && $dbAdapter instanceof Db) {
             $this->_dbAdapter = $dbAdapter;
         }
     }

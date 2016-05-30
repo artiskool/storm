@@ -1,7 +1,7 @@
 <?php
 /*****************************************************************************\
  *                                                                           *
- *  DbInterface.php                                                          *
+ *  Db.php                                                                   *
  *                                                                           *
  *  @author     Arthur Layese (arthur@layese.com) 2016                       *
  *  @package    Storm                                                        *

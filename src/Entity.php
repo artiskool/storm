@@ -33,39 +33,18 @@
 
 namespace Storm;
 
-abstract class Entity implements Orm, \Iterator
+abstract class Entity extends Orm implements \Iterator
 {
-    abstract public function dbAdapter();
-
-    abstract public function ormSequence();
-    abstract public function ormAudit();
-    abstract public function ormAuditValue();
-
-    const REPLACE = 1;
-    const INSERT = 2;
-    const UPDATE = 3;
-    const DELETE = 4;
-    protected $_persistMode = self::REPLACE;
-    protected $_primaryKeys = array();
-    protected $_table;
-    protected $_cascadePersist = true;
-    protected $_cascadePopulate = true;
-    protected $_cascadeToArray = true;
-    protected $_shouldAudit = true;
-    protected $_foreignKey;
-
-    private $_tracking;
+    private $_tracking = null;
 
     public function __construct()
     {
-        $primaryKeys = $this->getPrimaryKeys();
-        if (count($primaryKeys) == 0) {
+        if (count($this->_primaryKeys) == 0) {
             $key = strtolower(self::toClassName($this)) . '_id';
-            $primaryKeys[] = $key;
-            $this->setPrimaryKeys($primaryKeys);
+            $this->_primaryKeys[] = $key;
         }
-        if (empty($this->getTable())) {
-            $this->setTable(strtolower(self::toClassName($this)));
+        if (empty($this->_table)) {
+            $this->_table = strtolower(self::toClassName($this));
         }
     }
 
@@ -113,94 +92,6 @@ abstract class Entity implements Orm, \Iterator
         return $this->__get($key);
     }
 
-    public function getPersistMode()
-    {
-        return $this->_persistMode;
-    }
-
-    public function setPersistMode($persistMode)
-    {
-        $this->_persistMode = $persistMode;
-        return $this;
-    }
-
-    public function getPrimaryKeys()
-    {
-        return $this->_primaryKeys;
-    }
-
-    public function setPrimaryKeys($primaryKeys)
-    {
-        $this->_primaryKeys = $primaryKeys;
-        return $this;
-    }
-
-    public function getTable()
-    {
-        return $this->_table;
-    }
-
-    public function setTable($table)
-    {
-        $this->_table = $table;
-        return $this;
-    }
-
-    public function getCascadePersist()
-    {
-        return $this->_cascadePersist;
-    }
-
-    public function setCascadePersist($cascadePersist)
-    {
-        $this->_cascadePersist = $cascadePersist;
-        return $this;
-    }
-
-    public function getCascadePopulate()
-    {
-        return $this->_cascadePopulate;
-    }
-
-    public function setCascadePopulate($cascadePopulate)
-    {
-        $this->_cascadePopulate = $cascadePopulate;
-        return $this;
-    }
-
-    public function getCascadeToArray()
-    {
-        return $this->_cascadeToArray;
-    }
-
-    public function setCascadeToArray($cascadeToArray)
-    {
-        $this->_cascadeToArray = $cascadeToArray;
-        return $this;
-    }
-
-    public function getShouldAudit()
-    {
-        return $this->_shouldAudit;
-    }
-
-    public function setShouldAudit($shouldAudit)
-    {
-        $this->_shouldAudit = $shouldAudit;
-        return $this;
-    }
-
-    public function getForeignKey()
-    {
-        return $this->_foreignKey;
-    }
-
-    public function setForeignKey($foreignKey)
-    {
-        $this->_foreignKey = $foreignKey;
-        return $this;
-    }
-
     public static function toClassName($obj)
     {
         return (new \ReflectionClass($obj))->getShortName();
@@ -209,10 +100,10 @@ abstract class Entity implements Orm, \Iterator
     public function populateWithArray($array)
     {
         foreach ($array as $key => $value) {
-            if ($this->$key() instanceof Orm) {
-                $this->$key()->populateWithArray($value);
+            if ($this->$key instanceof Orm) {
+                $this->$key->populateWithArray($value);
             } else {
-                $this->$key($value);
+                $this->__set($key, $value);
             }
         }
         $this->postPopulate();
@@ -220,10 +111,10 @@ abstract class Entity implements Orm, \Iterator
 
     public function populate()
     {
-        $sql = "SELECT * FROM " . $this->getTable() . " WHERE 1 ";
+        $sql = "SELECT * FROM `{$this->_table}` WHERE 1 ";
         $doPopulate = false;
-        foreach ($this->getPrimaryKeys() as $key) {
-            $value = $this->$key();
+        foreach ($this->_primaryKeys as $key) {
+            $value = $this->$key;
             if ($value > 0 || strlen($value) > 0) {
                 $doPopulate = true;
                 $sql .= " AND $key = '"
@@ -241,26 +132,26 @@ abstract class Entity implements Orm, \Iterator
 
     public function postPopulate()
     {
-        if (!$this->getCascadePopulate()) {
+        if (!$this->_cascadePopulate) {
             return true;
         }
         $fields = $this->fields();
         foreach ($fields as $field) {
-            $obj = $this->$field();
+            $obj = $this->__get($field);
             if (!$obj instanceof Orm) {
                 continue;
             }
-            foreach ($obj->getPrimaryKeys() as $key) {
+            foreach ($obj->_primaryKeys as $key) {
                 $newKey = $key;
                 if ($key == 'id') { // get the foreign key
-                    if ($obj->getForeignKey()) {
-                        $newKey = $obj->getForeignKey();
+                    if ($obj->_foreignKey) {
+                        $newKey = $obj->_foreignKey;
                     } else {
                         $newKey = strtolower(self::toClassName($obj)) . '_id';
                     }
                 }
                 if (in_array($newKey, $fields)) {
-                    $obj->$key($this->$newKey());
+                    $obj->$key = $this->$newKey;
                 }
             }
             $obj->populate();
@@ -279,7 +170,7 @@ abstract class Entity implements Orm, \Iterator
                     continue;
                 }
                 unset($fields[$col]);
-                $this->$col($val);
+                $this->__set($col, $val);
             }
         }
         return $retval;
@@ -299,30 +190,33 @@ abstract class Entity implements Orm, \Iterator
         return $this;
     }
 
+    public function setPersistMode($mode)
+    {
+        $this->_persistMode = $mode;
+    }
+
     public function audit($obj)
     {
-        $primaryKeys = $obj->getPrimaryKeys();
-        $objectIdKey = $primaryKeys[0];
-
         $auditId = $this->ormSequence()->nextId(2);
         $class = $this->ormAudit();
         $audit = new $class();
-        $audit->auditId($auditId)
-            ->objectClass(self::toClassName($obj))
-            ->objectId($obj->$objectIdKey())
-            ->userId(Registry::get('user_id'))
-            ->type($obj->getPersistMode())
-            ->datetime(date('Y-m-d H:i:s'));
+        $audit->auditId = $auditId;
+        $audit->objectClass = self::toClassName($obj);
+        $objectIdKey = $obj->_primaryKeys[0];
+        $audit->objectId = $obj->$objectIdKey;
+        $audit->userId = Registry::get('user_id');
+        $audit->type = $obj->_persistMode;
+        $audit->datetime = date('Y-m-d H:i:s');
         if ($obj instanceof Orm) {
             foreach ($obj->fields() as $field) {
                 $class = $this->ormAuditValue();
                 $auditValue = new $class();
-                $auditValue->auditId($auditId)
-                    ->key($field);
+                $auditValue->auditId = $auditId;
+                $auditValue->key = $field;
                 if (is_object($obj->$field)) {
-                    $auditValue->value(self::toClassName($obj->$field()));
+                    $auditValue->value = self::toClassName($obj->$field);
                 } else {
-                    $auditValue->value((string)$obj->$field());
+                    $auditValue->value = (string)$obj->$field;
                 }
                 $auditValue->persist();
             }
@@ -357,9 +251,9 @@ abstract class Entity implements Orm, \Iterator
         $fields = $this->fields();
         $array = array();
         foreach ($fields as $field) {
-            $value = $this->$field();
+            $value = $this->$field;
             if ($value instanceof Orm) {
-                if ($this->getCascadeToArray()) {
+                if ($this->_cascadeToArray) {
                     $array[$field] = $value->toArray();
                 }
             } else {
@@ -369,7 +263,7 @@ abstract class Entity implements Orm, \Iterator
         return $array;
     }
 
-    public function toSql()
+    protected function toSql()
     {
         $fields = $this->fields();
         $where = array('1');
@@ -377,16 +271,15 @@ abstract class Entity implements Orm, \Iterator
         $fieldNames = array();
         for ($i = 0, $ctr = count($fields); $i < $ctr; $i++) {
             $field = $fields[$i];
-            $val = $this->$field();
+            $val = $this->__get($field);
             if (is_object($val)) {
-                if ($val instanceof Orm && $this->getCascadePersist()) {
-                    $val->setPersistMode($this->getPersistMode());
+                if ($val instanceof Orm && $this->_cascadePersist) {
+                    $val->_persistMode = $this->_persistMode;
                     $val->persist();
-                    $foreignKey = $field.'_id';
+                    $foreignKey = $field . '_id';
                     if (in_array($foreignKey, $fields)) {
-                        $primaryKeys = $val->getPrimaryKeys();
-                        $primaryKey = $primaryKeys[0];
-                        $this->$foreignKey($val->$primaryKey());
+                        $primaryKey = $val->_primaryKeys[0];
+                        $this->$foreignKey = $val->$primaryKey;
                     }
                 }
                 continue;
@@ -398,8 +291,8 @@ abstract class Entity implements Orm, \Iterator
                 }
                 continue;
             }
-            if ($this->getPersistMode() == self::DELETE) {
-                if (in_array($field, $this->getPrimaryKeys()) && ($val > 0
+            if ($this->_persistMode == self::DELETE) {
+                if (in_array($field, $this->_primaryKeys) && ($val > 0
                     || (!is_numeric($val) && strlen($val) > 0))
                 ) {
                     $where[] = " AND `$field` = "
@@ -409,7 +302,7 @@ abstract class Entity implements Orm, \Iterator
                 continue;
             }
 
-            if (in_array($field, $this->getPrimaryKeys()) && !$val > 0) {
+            if (in_array($field, $this->_primaryKeys) && !$val > 0) {
                 $where[] = " AND `$field` = ".$this->dbAdapter()->quote($val);
                 $seqTable = 1;
                 if (self::toClassName($this) == 'Audit'
@@ -419,10 +312,10 @@ abstract class Entity implements Orm, \Iterator
                 }
                 if (self::toClassName($this) == 'Audit'
                     || self::toClassName($this) == 'AuditValue'
-                    || $this->getPersistMode() != self::DELETE
+                    || $this->_persistMode != self::DELETE
                 ) {
                     $lastId = $this->ormSequence()->nextId($seqTable);
-                    $this->$field($lastId);
+                    $this->__set($field, $lastId);
                     $val = $lastId;
                 }
             }
@@ -434,28 +327,33 @@ abstract class Entity implements Orm, \Iterator
             }
         }
 
-        if ($this->getPersistMode() == self::REPLACE) {
-            $sql = "REPLACE INTO `" . $this->getTable() . "` SET ";
-        } elseif ($this->getPersistMode() == self::INSERT) {
-            $sql = "INSERT INTO `" . $this->getTable() . "` SET ";
-        } elseif ($this->getPersistMode() == self::UPDATE) {
-            $sql = "UPDATE `" . $this->getTable() . "` SET ";
-        } elseif ($this->getPersistMode() == self::DELETE) {
-            $sql = "DELETE FROM `" . $this->getTable() . "` ";
+        switch ($this->_persistMode) {
+            case self::REPLACE:
+                $sql = "REPLACE INTO `{$this->_table}` SET ";
+                break;
+            case self::INSERT:
+                $sql = "INSERT INTO `{$this->_table}` SET ";
+                break;
+            case self::UPDATE:
+                $sql = "UPDATE `{$this->_table}` SET ";
+                break;
+            case self::DELETE:
+                $sql = "DELETE FROM `{$this->_table}` ";
+                break;
         }
 
         if ($fieldNames) {
             $fieldValues = array();
             foreach ($fieldNames as $field) {
-                $val = $this->$field();
+                $val = $this->__get($field);
                 $fieldValues[] = " `{$field}` = "
                                . $this->dbAdapter()->quote($val);
             }
             $sql .= implode(', ', $fieldValues);
         }
 
-        if ($this->getPersistMode() == self::UPDATE
-            || $this->getPersistMode() == self::DELETE
+        if ($this->_persistMode == self::UPDATE
+            || $this->_persistMode == self::DELETE
         ) {
             $sql .= " WHERE " . implode(' ', $where);
         }
@@ -515,12 +413,12 @@ abstract class Entity implements Orm, \Iterator
 
     public function shouldAudit()
     {
-        return $this->getShouldAudit();
+        return $this->_shouldAudit;
     }
 
     public function rewind()
     {
-        if ($this->_tracking == null) {
+        if ($this->_tracking === null) {
             $this->_tracking = $this->fields();
         }
         reset($this->_tracking);
@@ -529,7 +427,7 @@ abstract class Entity implements Orm, \Iterator
     public function current()
     {
         $key = current($this->_tracking);
-        $var = $this->$key();
+        $var = $this->__get($key);
         return $var;
     }
 

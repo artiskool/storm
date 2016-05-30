@@ -14,27 +14,40 @@
 
 namespace Storm;
 
-interface Orm
+abstract class Orm
 {
-    public function dbAdapter();
+    const REPLACE = 1;
+    const INSERT = 2;
+    const UPDATE = 3;
+    const DELETE = 4;
 
-    public function ormSequence();
-    public function ormAudit();
-    public function ormAuditValue();
+    protected $_persistMode = self::REPLACE;
+    protected $_primaryKeys = array();
+    protected $_table;
+    protected $_cascadePersist = true;
+    protected $_cascadePopulate = true;
+    protected $_cascadeToArray = true;
+    protected $_shouldAudit = true;
+    protected $_foreignKey;
 
-    public function setPersistMode($mode);
-    public function populateWithArray($array);
-    public function populate();
-    public function postPopulate();
-    public function populateWithSql($sql);
-    public function persist();
-    public function audit($obj);
-    public function fields();
-    public function toString();
-    public function toArray();
-    public function toSql();
-    public function getCollection($dbSelect = null);
-    public function postPersist();
-    public function shouldAudit();
-    public function toXml();
+    abstract public function dbAdapter();
+
+    abstract public function ormSequence();
+    abstract public function ormAudit();
+    abstract public function ormAuditValue();
+
+    abstract public function setPersistMode($mode);
+    abstract public function populateWithArray($array);
+    abstract public function populate();
+    abstract public function postPopulate();
+    abstract public function populateWithSql($sql);
+    abstract public function persist();
+    abstract public function audit($obj);
+    abstract public function fields();
+    abstract public function toString();
+    abstract public function toArray();
+    abstract public function getCollection($dbSelect = null);
+    abstract public function postPersist();
+    abstract public function shouldAudit();
+    abstract public function toXml();
 }
