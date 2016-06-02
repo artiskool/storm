@@ -397,13 +397,31 @@ abstract class Entity extends Orm implements \Iterator
         throw new \Exception('Call to undefined method '.get_class($this).'::'.$method.'()');
     }
 
-    public function getCollection($dbSelect = null)
-    {
+    /**
+     * Get collection
+     *
+     * @param string            $where  OPTIONAL An SQL WHERE clause.
+     * @param string            $order  OPTIONAL An SQL ORDER clause.
+     * @param int               $count  OPTIONAL An SQL LIMIT count.
+     * @param int               $offset OPTIONAL An SQL LIMIT offset.
+     */
+    public function getCollection(
+        $where = null,
+        $order = null,
+        $count = null,
+        $offset = null
+    ) {
         $class = get_class($this) . 'Collection';
         if (class_exists($class)) {
             $collection = new $class();
         } else {
-            $collection = new Collection(get_class($this), $dbSelect);
+            $collection = new Collection(
+                get_class($this),
+                $where,
+                $order,
+                $count,
+                $offset
+            );
         }
         return $collection;
     }
