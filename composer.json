@@ -1,7 +1,7 @@
 {
     "name": "artiskool/storm",
-    "description": "Simple Transactional Object Relational Mapper",
     "type": "library",
+    "description": "Simple Transactional Object Relational Mapper",
     "license": "GPL v3",
     "keywords": [
         "artiskool",
@@ -9,6 +9,12 @@
         "orm"
     ],
     "homepage": "http://storm.com.ph/",
+    "authors": [
+        {
+            "name": "Arthur Layese",
+            "email": "arthur@layese.com"
+        }
+    ],
     "support": {
         "email": "support@storm.com.ph",
         "source": "https://github.com/artiskool/storm",
