@@ -44,8 +44,22 @@ class Collection implements \SeekableIterator
     protected $loadOnce = true;
     protected $init = false;
 
-    public function __construct($class, $select = null)
-    {
+    /**
+     * Initialize a collection
+     *
+     * @param string|Entity     $class Class name for entity
+     * @param string            $where  OPTIONAL An SQL WHERE clause.
+     * @param string            $order  OPTIONAL An SQL ORDER clause.
+     * @param int               $count  OPTIONAL An SQL LIMIT count.
+     * @param int               $offset OPTIONAL An SQL LIMIT offset.
+     */
+    public function __construct(
+        $class,
+        $where = null,
+        $order = null,
+        $count = null,
+        $offset = null
+    ) {
         if (is_object($class)) {
             $this->class = get_class($class);
             $this->orm = $class;
@@ -53,8 +67,15 @@ class Collection implements \SeekableIterator
             $this->class = $class;
             $this->orm = new $this->class();
         }
-        if (null === $select) {
-            $select = "SELECT * FROM `{$this->orm->_table}`";
+        $select = "SELECT * FROM `{$this->orm->_table}`";
+        if ($where !== null) {
+            $select .= " WHERE {$where}";
+        }
+        if ($order !== null) {
+            $select .= " ORDER BY {$order}";
+        }
+        if ($count !== null || $offset !== null) {
+            $select .= " LIMIT " . (int)$offset . ', ' . (int)$count;
         }
         $this->select = $select;
     }
