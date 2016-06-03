@@ -261,7 +261,7 @@ abstract class Entity extends Orm implements \Iterator
         $fields = $this->fields();
         $array = array();
         foreach ($fields as $field) {
-            $value = $this->__get($field);
+            $value = $this->$field;
             if ($value instanceof Orm) {
                 if ($this->_cascadeToArray) {
                     $array[$field] = $value->toArray();
@@ -305,7 +305,7 @@ abstract class Entity extends Orm implements \Iterator
                 continue;
             } elseif (is_array($val)) {
                 foreach ($val as $item) {
-                    if ($item instanceof Orm) {
+                    if ($item instanceof Orm && $this->_cascadePersist) {
                         $item->persist();
                     }
                 }
