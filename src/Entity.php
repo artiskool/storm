@@ -214,10 +214,19 @@ abstract class Entity extends Orm implements \Iterator
                 $auditValue = new $class();
                 $auditValue->auditId = $auditId;
                 $auditValue->key = $field;
-                if (is_object($obj->$field)) {
-                    $auditValue->value = self::toClassName($obj->$field);
+                $value = $obj->$field;
+                if (is_object($value)) {
+                    $auditValue->value = self::toClassName($value);
                 } else {
-                    $auditValue->value = (string)$obj->$field;
+                    if (is_array($value)) {
+                        if ($item = array_shift($value)) {
+                            $auditValue->value = self::toClassName($item);
+                        } else {
+                            $auditValue->value = 'Array';
+                        }
+                    } else {
+                        $auditValue->value = (string)$obj->$field;
+                    }
                 }
                 $auditValue->persist();
             }
@@ -252,10 +261,20 @@ abstract class Entity extends Orm implements \Iterator
         $fields = $this->fields();
         $array = array();
         foreach ($fields as $field) {
-            $value = $this->$field;
+            $value = $this->__get($field);
             if ($value instanceof Orm) {
                 if ($this->_cascadeToArray) {
                     $array[$field] = $value->toArray();
+                }
+            } elseif (is_array($value)) {
+                $array[$field] = array();
+                foreach ($value as $val) {
+                    if (!($val instanceof Orm)) {
+                        continue;
+                    }
+                    if ($this->_cascadeToArray) {
+                        $array[$field][] = $val->toArray();
+                    }
                 }
             } else {
                 $array[$field] = $value;
