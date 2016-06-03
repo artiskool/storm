@@ -17,7 +17,7 @@ namespace Storm;
 abstract class Sequence
 {
     protected $_table = 'sequences';
-    protected $_primaryKey = 'id';
+    protected $_primaryKey = 'sequence_id';
     protected $_dbAdapter;
 
     public function __construct($dbAdapter = null)
