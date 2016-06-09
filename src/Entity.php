@@ -142,17 +142,29 @@ abstract class Entity extends Orm implements \Iterator
             if (!$obj instanceof Orm) {
                 continue;
             }
-            foreach ($obj->_primaryKeys as $key) {
-                $newKey = $key;
-                if ($key == 'id') { // get the foreign key
-                    if ($obj->_foreignKey) {
-                        $newKey = $obj->_foreignKey;
-                    } else {
-                        $newKey = strtolower(self::toClassName($obj)) . '_id';
-                    }
+            // check for entity class name
+            $childId = $field . '_id';
+            if (in_array($childId, $fields)) {
+                foreach ($obj->_primaryKeys as $key) {
+                    $obj->$key = $this->$childId;
                 }
-                if (in_array($newKey, $fields)) {
-                    $obj->$key = $this->$newKey;
+            } else {
+                foreach ($obj->_primaryKeys as $key) {
+                    if (in_array($key, $fields)) {
+                        $obj->$key = $this->$key;
+                    } else {
+                        // check if there's an underscore
+                        if (strpos($key,'_') !== false) { // table_id
+                            $newKey = str_replace(' ','',ucwords(str_replace('_',' ',$key)));
+                            // lower case the first character
+                            $newKey[0] = strtolower($newKey[0]);
+                        } else {
+                            $newKey = preg_replace('/([A-Z]{1})/','_\1',$key);
+                        }
+                        if (in_array($newKey, $fields)) {
+                            $obj->$newKey = $this->$newKey;
+                        }
+                    }
                 }
             }
             $obj->populate();
@@ -312,12 +324,16 @@ abstract class Entity extends Orm implements \Iterator
                 continue;
             }
             if ($this->_persistMode == self::DELETE) {
+                /*
                 if (in_array($field, $this->_primaryKeys) && ($val > 0
                     || (!is_numeric($val) && strlen($val) > 0))
                 ) {
                     $where[] = " AND `$field` = "
                              . $this->dbAdapter()->quote($val);
                 }
+                */
+                $where[] = " AND `$field` = "
+                         . $this->dbAdapter()->quote($val);
                 // code below is just for replace/insert
                 continue;
             }
