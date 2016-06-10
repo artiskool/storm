@@ -324,16 +324,10 @@ abstract class Entity extends Orm implements \Iterator
                 continue;
             }
             if ($this->_persistMode == self::DELETE) {
-                /*
-                if (in_array($field, $this->_primaryKeys) && ($val > 0
-                    || (!is_numeric($val) && strlen($val) > 0))
-                ) {
+                if (in_array($field, $this->_primaryKeys)) {
                     $where[] = " AND `$field` = "
                              . $this->dbAdapter()->quote($val);
                 }
-                */
-                $where[] = " AND `$field` = "
-                         . $this->dbAdapter()->quote($val);
                 // code below is just for replace/insert
                 continue;
             }
